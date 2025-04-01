@@ -1,0 +1,19 @@
+---
+- name: Automatische Server-Updates
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Paketliste aktualisieren
+      apt:
+        update_cache: yes
+
+    - name: System aktualisieren
+      apt:
+        upgrade: dist
+        autoremove: yes
+
+    - name: Neustart nach Update (wenn nötig)
+      reboot:
+        msg: "System wird nach Update neu gestartet"
+        reboot_timeout: 300
