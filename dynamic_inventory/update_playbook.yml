@@ -1,0 +1,19 @@
+---
+- name: Automatic Server Updates
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade system packages
+      apt:
+        upgrade: dist
+        autoremove: yes
+
+    - name: Reboot if required
+      reboot:
+        msg: "Rebooting after updates"
+        reboot_timeout: 300
