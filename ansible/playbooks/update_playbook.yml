@@ -1,0 +1,11 @@
+---
+- name: Update all servers
+  hosts: all
+  tasks:
+    - name: Ensure apt cache is updated
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: yes

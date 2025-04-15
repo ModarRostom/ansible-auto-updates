@@ -1,0 +1,11 @@
+[Unit]
+Description=Ansible Auto Update Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /home/username/ansible-auto-updates/scripts/auto_update.sh
+Restart=always
+User=your_user
+
+[Install]
+WantedBy=multi-user.target
