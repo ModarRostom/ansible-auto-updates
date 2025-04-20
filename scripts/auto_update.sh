@@ -1,41 +1,31 @@
 #!/bin/bash
-cd ~/ansible-auto-updates
 
-log_file="logs/update.log"
-timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+# Set log file path
+LOGFILE="/var/log/ansible-auto-update.log"
 
-log_message() {
-    echo "[$timestamp] $1" >> $log_file
-}
+# Log start time
+echo "===== UPDATE STARTED: $(date) =====" >> "$LOGFILE"
 
-send_error_notification() {
-    webhook_url="YOUR_SLACK_WEBHOOK_URL"  # Set your Slack Webhook URL here
-    curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" $webhook_url
-}
+# Update system
+if apt update && apt upgrade -y >> "$LOGFILE" 2>&1; then
+    echo "System updated successfully at $(date)" >> "$LOGFILE"
 
-log_message "Starting automatic network scan and update"
-
-# Update the dynamic inventory
-log_message "Starting IP scan..."
-
-if python3 dynamic_inventory/dynamic_inventory.py; then
-    log_message "IP scanning completed successfully."
+    # Optional email notification on success
+    echo "System update successful on $(hostname)" | mail -s "Update OK on $(hostname)" admin@example.com
 else
-    log_message "IP scanning failed."
-    send_error_notification "IP scanning failed during automation."
-    exit 1
+    echo "Update failed at $(date)" >> "$LOGFILE"
+
+    # Optional email notification on failure
+    echo "System update FAILED on $(hostname)" | mail -s "Update FAILED on $(hostname)" admin@example.com
 fi
 
-log_message "Running Ansible playbook for updates..."
-
-# Run the Ansible playbook
-if ansible-playbook -i dynamic_inventory/inventory.json playbooks/update_playbook.yml; then
-    log_message "Update process completed successfully."
+# Reboot if required
+if [ -f /var/run/reboot-required ]; then
+    echo "Reboot required. Rebooting system..." >> "$LOGFILE"
+    reboot
 else
-    log_message "Update process failed."
-    send_error_notification "Ansible playbook execution failed during automation."
-    python3 dynamic_inventory/dynamic_inventory.py --send-error
-    exit 1
+    echo "No reboot required." >> "$LOGFILE"
 fi
 
-log_message "Automatic network update tasks finished."
+# Log end time
+echo "===== UPDATE FINISHED: $(date) =====" >> "$LOGFILE"
