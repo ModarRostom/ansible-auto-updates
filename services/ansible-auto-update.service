@@ -1,11 +1,12 @@
 [Unit]
-Description=Ansible Auto Update Service
+Description=Run Ansible Auto-Update Script
 After=network.target
+OnFailure=notify-admin@%n.service
 
 [Service]
-ExecStart=/bin/bash /home/username/ansible-auto-updates/scripts/auto_update.sh
-Restart=always
-User=your_user
-
-[Install]
-WantedBy=multi-user.target
+Type=oneshot
+WorkingDirectory=/home/modaradmin/Projekte/ansible-auto-updates
+ExecStart=./scripts/auto_update.sh
+StandardOutput=journal
+StandardError=journal
+Environment=ENV=production
