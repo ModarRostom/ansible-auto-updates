@@ -9,3 +9,14 @@
     - name: Upgrade all packages
       apt:
         upgrade: yes
+
+- name: Send notification email after update
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: your_username
+    password: your_password
+    to: admin@yourcompany.com
+    subject: " Update successful on {{ inventory_hostname }}"
+    body: "System {{ inventory_hostname }} was updated on {{ ansible_date_time.date }}."
+  when: ansible_os_family == "Debian"
